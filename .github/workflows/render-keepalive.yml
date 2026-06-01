@@ -15,14 +15,14 @@ jobs:
     timeout-minutes: 2
 
     env:
-      RENDER_PING_URL: ${{ vars.RENDER_PING_URL || secrets.RENDER_PING_URL }}
+      RENDER_PING_URL: https://caligraphybe.onrender.com/health
 
     steps:
       - name: Check ping URL
         shell: bash
         run: |
           if [ -z "$RENDER_PING_URL" ]; then
-            echo "Set RENDER_PING_URL as a GitHub Actions repository variable or secret."
+            echo "Set RENDER_PING_URL in .github/workflows/render-keepalive.yml."
             exit 1
           fi
 

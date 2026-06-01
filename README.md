@@ -82,10 +82,10 @@ npm run dev
 
 The GitHub Actions workflow at `.github/workflows/render-keepalive.yml` pings Render every 11 minutes.
 
-In GitHub, set this repository variable or secret:
+It is currently configured to ping:
 
 ```text
-RENDER_PING_URL=https://your-render-service.onrender.com/health
+https://caligraphybe.onrender.com/health
 ```
 
 ## API
