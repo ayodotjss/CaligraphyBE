@@ -24,7 +24,7 @@ const envSchema = z.object({
   CONTRACT_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "CONTRACT_ADDRESS must be an EVM address"),
   CHAIN_ID: z.coerce.bigint().positive(),
   SIGNER_PRIVATE_KEY: z.string().regex(/^0x[a-fA-F0-9]{64}$/, "SIGNER_PRIVATE_KEY must be a 32-byte hex private key"),
-  FRONTEND_ORIGIN: z.string().default("*"),
+  FRONTEND_ORIGIN: z.string().url("FRONTEND_ORIGIN must be your frontend URL, for example http://localhost:3000"),
   API_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
   API_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
   ROLL_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),

@@ -41,6 +41,12 @@ DATA_FILE=./data/rolls.json
 
 The signer address must match `trustedSigner` in the deployed contract.
 
+`FRONTEND_ORIGIN` is the only browser origin accepted by CORS. In production, set it to your deployed frontend URL, for example:
+
+```env
+FRONTEND_ORIGIN=https://your-frontend.vercel.app
+```
+
 ## Storage
 
 Local JSON storage is fine for local testing:

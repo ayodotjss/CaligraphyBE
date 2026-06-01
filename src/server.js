@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { config } from "./config.js";
 import { assertSignerMatchesContract, provider, signer } from "./contract.js";
 import { rollStore } from "./db/rollStore.js";
+import { corsOptions } from "./middleware/corsOptions.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiLimiter } from "./middleware/rateLimiters.js";
 import { rollsRouter } from "./routes/rolls.js";
@@ -16,9 +17,7 @@ app.disable("x-powered-by");
 app.set("trust proxy", config.TRUST_PROXY);
 app.use(helmet());
 app.use(compression());
-app.use(cors({
-  origin: config.FRONTEND_ORIGIN === "*" ? true : config.FRONTEND_ORIGIN
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "32kb" }));
 app.use(morgan(config.NODE_ENV === "production" ? "combined" : "dev", {
   skip: (req) => config.NODE_ENV === "production" && req.path === "/health"
