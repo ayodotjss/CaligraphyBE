@@ -4,6 +4,7 @@ import { z } from "zod";
 import { MintState, getWalletMintStatus, signDiceRoll } from "../contract.js";
 import { rollDice, createNonce } from "../dice/xoshiro256starstar.js";
 import { HttpError } from "../middleware/errorHandler.js";
+import { rollLimiter } from "../middleware/rateLimiters.js";
 import { rollStore } from "../db/rollStore.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -18,7 +19,7 @@ const statusUpdateSchema = z.object({
   txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/).optional()
 });
 
-router.post("/roll", asyncHandler(async (req, res) => {
+router.post("/roll", rollLimiter, asyncHandler(async (req, res) => {
   const { wallet } = rollRequestSchema.parse(req.body);
   const checksummedWallet = ethers.getAddress(wallet);
   const status = await getWalletMintStatus(checksummedWallet);

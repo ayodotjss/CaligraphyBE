@@ -22,11 +22,19 @@ Copy-Item .env.example .env
 Fill in `.env`:
 
 ```env
+PORT=3001
+NODE_ENV=development
+TRUST_PROXY=1
 RPC_URL=http://127.0.0.1:8545
 CONTRACT_ADDRESS=0xYourDeployedContract
 CHAIN_ID=31337
 SIGNER_PRIVATE_KEY=0xYourBackendSignerPrivateKey
 FRONTEND_ORIGIN=http://localhost:3000
+API_RATE_LIMIT_WINDOW_MS=60000
+API_RATE_LIMIT_MAX=120
+ROLL_RATE_LIMIT_WINDOW_MS=60000
+ROLL_RATE_LIMIT_MAX=10
+REQUEST_TIMEOUT_MS=30000
 ROLL_STORE=json
 DATA_FILE=./data/rolls.json
 ```
@@ -47,9 +55,14 @@ For Supabase/Postgres:
 ```env
 ROLL_STORE=postgres
 DATABASE_URL=postgresql://postgres:password@host:5432/postgres
+POSTGRES_MAX_CONNECTIONS=5
+POSTGRES_SSL=true
+POSTGRES_PREPARE=false
 ```
 
 On startup the backend creates the `rolls` table and the active-roll uniqueness index automatically.
+
+For higher traffic, use `ROLL_STORE=postgres`. The local JSON store is only intended for development or demos.
 
 ## Run
 
@@ -71,7 +84,11 @@ RENDER_PING_URL=https://your-render-service.onrender.com/health
 
 ### `GET /health`
 
-Returns backend and chain status.
+Cheap liveness endpoint for Render/GitHub keepalive pings. It does not hit the RPC provider.
+
+### `GET /ready`
+
+Readiness endpoint that checks the configured chain connection.
 
 ### `POST /roll`
 

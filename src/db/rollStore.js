@@ -16,6 +16,10 @@ class JsonRollStore {
     return undefined;
   }
 
+  async close() {
+    return undefined;
+  }
+
   async readAll() {
     try {
       const raw = await fs.readFile(this.filePath, "utf8");
@@ -87,8 +91,9 @@ class JsonRollStore {
 class PostgresRollStore {
   constructor(databaseUrl = config.DATABASE_URL) {
     this.sql = postgres(databaseUrl, {
-      max: 5,
-      ssl: "require",
+      max: config.POSTGRES_MAX_CONNECTIONS,
+      ssl: config.POSTGRES_SSL ? "require" : false,
+      prepare: config.POSTGRES_PREPARE,
       transform: postgres.camel
     });
     this.name = "postgres";
@@ -116,6 +121,10 @@ class PostgresRollStore {
       on rolls (lower(wallet), attempt_number)
       where status in ('generated', 'submitted')
     `;
+  }
+
+  async close() {
+    await this.sql.end({ timeout: 5 });
   }
 
   async getOrCreateActiveByWalletAttempt(wallet, attemptNumber, createRoll) {
