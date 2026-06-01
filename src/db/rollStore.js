@@ -100,27 +100,31 @@ class PostgresRollStore {
   }
 
   async init() {
-    await this.sql`
-      create table if not exists rolls (
-        id bigserial primary key,
-        wallet text not null,
-        dice_result integer not null check (dice_result between 1 and 6),
-        nonce text not null unique,
-        signature text not null,
-        message_hash text not null,
-        attempt_number text not null,
-        status text not null check (status in ('generated', 'submitted', 'minted', 'failed')),
-        created_at timestamptz not null default now(),
-        updated_at timestamptz,
-        tx_hash text
-      )
-    `;
+    try {
+      await this.sql`
+        create table if not exists rolls (
+          id bigserial primary key,
+          wallet text not null,
+          dice_result integer not null check (dice_result between 1 and 6),
+          nonce text not null unique,
+          signature text not null,
+          message_hash text not null,
+          attempt_number text not null,
+          status text not null check (status in ('generated', 'submitted', 'minted', 'failed')),
+          created_at timestamptz not null default now(),
+          updated_at timestamptz,
+          tx_hash text
+        )
+      `;
 
-    await this.sql`
-      create unique index if not exists rolls_active_wallet_attempt_idx
-      on rolls (lower(wallet), attempt_number)
-      where status in ('generated', 'submitted')
-    `;
+      await this.sql`
+        create unique index if not exists rolls_active_wallet_attempt_idx
+        on rolls (lower(wallet), attempt_number)
+        where status in ('generated', 'submitted')
+      `;
+    } catch (error) {
+      throw enhancePostgresConnectionError(error);
+    }
   }
 
   async close() {
@@ -211,6 +215,30 @@ function normalizePostgresRoll(roll) {
     updatedAt: roll.updatedAt instanceof Date ? roll.updatedAt.toISOString() : roll.updatedAt,
     txHash: roll.txHash
   };
+}
+
+function enhancePostgresConnectionError(error) {
+  if (error.code === "ENOTFOUND") {
+    return new Error(
+      `Could not resolve Postgres host "${error.hostname}". Check DATABASE_URL in .env. `
+      + "For Supabase, copy the exact Direct connection or Pooler connection string from Project Settings > Database > Connection string."
+    );
+  }
+
+  if (error.code === "ECONNREFUSED" || error.code === "ETIMEDOUT") {
+    return new Error(
+      "Could not reach Postgres. Check DATABASE_URL host/port, Supabase project status, and whether your network allows the connection."
+    );
+  }
+
+  if (error.code === "28P01") {
+    return new Error(
+      "Postgres rejected the DATABASE_URL username/password. For Supabase Session pooler, use the exact pooler URL from Connect, "
+      + "keep the username as postgres.<project-ref>, and replace [YOUR-PASSWORD] with the database password, not your Supabase account password."
+    );
+  }
+
+  return error;
 }
 
 export const rollStore = config.ROLL_STORE === "postgres"

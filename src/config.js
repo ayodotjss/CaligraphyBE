@@ -1,5 +1,7 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { z } from "zod";
+
+dotenv.config({ override: true });
 
 const envBoolean = z.preprocess((value) => {
   if (typeof value !== "string") return value;

@@ -70,6 +70,8 @@ On startup the backend creates the `rolls` table and the active-roll uniqueness 
 
 For higher traffic, use `ROLL_STORE=postgres`. The local JSON store is only intended for development or demos.
 
+If you see `getaddrinfo ENOTFOUND db.xxxxx.supabase.co`, your machine/server cannot resolve that database hostname. Copy the connection string again from Supabase **Project Settings > Database > Connection string**. You can use either the Direct connection URL or Supabase's Pooler URL. If direct DNS still fails, try the Pooler connection string from the same Supabase screen.
+
 ## Run
 
 ```powershell
